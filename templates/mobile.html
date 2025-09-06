@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Quantum Device - BB84 QKD</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+    
+    <!-- Tailwind configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#1A73E8',
+                        'accent-blue': '#4285F4',
+                        'success-green': '#0F9D58',
+                        'warning-yellow': '#F4B400',
+                        'danger-red': '#DB4437',
+                        'neutral-bg': '#F5F5F5',
+                        'text-primary': '#3C4043'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-neutral-bg text-text-primary min-h-screen">
+    
+    <!-- Mobile Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-primary-blue rounded-lg flex items-center justify-center">
+                        <i data-feather="zap" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold text-text-primary">Quantum Device</h1>
+                        <p class="text-xs text-gray-500">Session: {{ session_token[:8] }}...</p>
+                    </div>
+                </div>
+                <div class="connection-status">
+                    <div class="w-3 h-3 bg-success-green rounded-full"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 py-6 space-y-6">
+        
+        <!-- Connection Status -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-success-green bg-opacity-10 rounded-lg flex items-center justify-center">
+                    <i data-feather="wifi" class="w-5 h-5 text-success-green"></i>
+                </div>
+                <div>
+                    <h2 class="font-medium text-text-primary">Connected to Simulator</h2>
+                    <p class="text-sm text-gray-500">Ready to transmit quantum data</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantum Measurements -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h3 class="font-medium text-text-primary mb-4 flex items-center">
+                <i data-feather="activity" class="w-4 h-4 mr-2"></i>
+                Quantum Measurements
+            </h3>
+            
+            <!-- Measurement Controls -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Photon Detection Rate</label>
+                    <input type="range" id="photonRate" min="50" max="200" value="100" 
+                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>50 Hz</span>
+                        <span id="photonRateValue">100 Hz</span>
+                        <span>200 Hz</span>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button id="startMeasurement" 
+                            class="w-full bg-primary-blue text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                        Start Quantum Measurement
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Measurement Results -->
+        <div id="measurementResults" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hidden">
+            <h3 class="font-medium text-text-primary mb-4 flex items-center">
+                <i data-feather="bar-chart-2" class="w-4 h-4 mr-2"></i>
+                Measurement Results
+            </h3>
+            <div id="resultsContent" class="space-y-2 text-sm text-gray-600">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+
+        <!-- Test Data Transmission -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h3 class="font-medium text-text-primary mb-4 flex items-center">
+                <i data-feather="send" class="w-4 h-4 mr-2"></i>
+                Test Data Transmission
+            </h3>
+            <p class="text-sm text-gray-600 mb-4">
+                Send simulated quantum measurement data to the testbed for analysis.
+            </p>
+            <button id="sendTestData" 
+                    class="w-full bg-accent-blue text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-500 transition-colors">
+                Send Test Data
+            </button>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="statusMessages" class="space-y-2">
+            <!-- Status messages will appear here -->
+        </div>
+        
+    </main>
+
+    <script>
+        // Initialize Feather Icons
+        feather.replace();
+        
+        const sessionToken = '{{ session_token }}';
+        
+        // Update photon rate display
+        const photonRateSlider = document.getElementById('photonRate');
+        const photonRateValue = document.getElementById('photonRateValue');
+        
+        photonRateSlider.addEventListener('input', function() {
+            photonRateValue.textContent = this.value + ' Hz';
+        });
+        
+        // Start measurement
+        document.getElementById('startMeasurement').addEventListener('click', async function() {
+            this.disabled = true;
+            this.textContent = 'Measuring...';
+            
+            try {
+                // Simulate quantum measurement
+                await simulateQuantumMeasurement();
+                showStatus('Quantum measurement completed successfully!', 'success');
+            } catch (error) {
+                showStatus('Measurement failed: ' + error.message, 'error');
+            } finally {
+                this.disabled = false;
+                this.textContent = 'Start Quantum Measurement';
+            }
+        });
+        
+        // Send test data
+        document.getElementById('sendTestData').addEventListener('click', async function() {
+            this.disabled = true;
+            this.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch('/api/simulate_mobile_data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        session_token: sessionToken
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    showStatus('Test data sent successfully!', 'success');
+                    displayResults(result);
+                } else {
+                    throw new Error(result.message || 'Failed to send test data');
+                }
+            } catch (error) {
+                showStatus('Failed to send test data: ' + error.message, 'error');
+            } finally {
+                this.disabled = false;
+                this.textContent = 'Send Test Data';
+            }
+        });
+        
+        async function simulateQuantumMeasurement() {
+            const photonRate = photonRateSlider.value;
+            
+            // Simulate measurement delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Generate simulated measurement data
+            const measurements = {
+                photon_detections: Array.from({length: photonRate}, (_, i) => `photon_${i}`),
+                duration: 10.0,
+                device_info: {
+                    model: 'Mobile Quantum Sensor',
+                    version: '1.0.0'
+                },
+                session_token: sessionToken
+            };
+            
+            // Send to backend
+            const response = await fetch('/api/submit_mobile_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session_token: sessionToken,
+                    measurements: measurements
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                displayResults(result);
+            } else {
+                throw new Error(result.message || 'Measurement failed');
+            }
+        }
+        
+        function displayResults(result) {
+            const resultsDiv = document.getElementById('measurementResults');
+            const resultsContent = document.getElementById('resultsContent');
+            
+            resultsContent.innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="text-center p-2 bg-gray-50 rounded">
+                        <div class="text-lg font-bold text-primary-blue">${result.metrics?.key_rate || 'N/A'}</div>
+                        <div class="text-xs text-gray-500">Key Rate (bits/s)</div>
+                    </div>
+                    <div class="text-center p-2 bg-gray-50 rounded">
+                        <div class="text-lg font-bold text-success-green">${(result.metrics?.qber * 100 || 0).toFixed(1)}%</div>
+                        <div class="text-xs text-gray-500">QBER</div>
+                    </div>
+                </div>
+                <div class="mt-2 p-2 rounded ${result.is_secure ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}">
+                    <div class="text-sm font-medium">
+                        ${result.is_secure ? '✓ Secure Communication' : '⚠ Insecure Channel'}
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.classList.remove('hidden');
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessages');
+            const statusElement = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700';
+            
+            statusElement.className = `p-3 rounded-lg ${bgColor} text-sm`;
+            statusElement.textContent = message;
+            
+            statusDiv.appendChild(statusElement);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                statusElement.remove();
+            }, 5000);
+        }
+        
+        // Update connection status periodically
+        setInterval(async function() {
+            try {
+                const response = await fetch('/api/mobile_device_status');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const device = result.devices.find(d => d.device_id === sessionToken);
+                    if (device && device.is_active) {
+                        document.querySelector('.connection-status .w-3').className = 'w-3 h-3 bg-success-green rounded-full';
+                    } else {
+                        document.querySelector('.connection-status .w-3').className = 'w-3 h-3 bg-yellow-500 rounded-full';
+                    }
+                }
+            } catch (error) {
+                document.querySelector('.connection-status .w-3').className = 'w-3 h-3 bg-red-500 rounded-full';
+            }
+        }, 5000);
+        
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!-- Professional Navigation Header -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <i data-feather="zap" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900">QuantumBB84</h1>
+                    <p class="text-xs text-gray-600">Professional QKD Platform</p>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-1">
+                <a href="/" class="nav-link px-4 py-2 rounded-full text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 font-medium">Home</a>
+                <a href="/simulator" class="nav-link px-4 py-2 rounded-full text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 font-medium">
+                    <i data-feather="cpu" class="w-4 h-4 inline mr-1"></i>
+                    Simulator
+                </a>
+                <a href="/testbed" class="nav-link px-4 py-2 rounded-full text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 font-medium">
+                    <i data-feather="server" class="w-4 h-4 inline mr-1"></i>
+                    Testbed
+                </a>
+            </div>
+            
+            <!-- Status Indicators -->
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span class="ml-2 text-sm text-gray-600">System Ready</span>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <button class="md:hidden text-gray-700" id="mobileMenuBtn">
+                    <i data-feather="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile menu -->
+    <div class="md:hidden hidden" id="mobileMenu">
+        <div class="px-4 py-2 space-y-1 bg-white border-t border-gray-200">
+            <a href="/" class="block px-3 py-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50">Home</a>
+            <a href="/simulator" class="block px-3 py-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50">Simulator</a>
+            <a href="/testbed" class="block px-3 py-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50">Testbed</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Add top padding to account for fixed header -->
+<div class="pt-16"></div>
+
+<script>
+// Mobile menu toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    
+    if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+    }
+    
+    // Set active navigation link
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === currentPath || (currentPath === '/' && href === '/')) {
+            link.classList.remove('text-gray-700', 'hover:text-blue-600', 'hover:bg-blue-50');
+            link.classList.add('bg-blue-600', 'text-white');
+        }
+    });
+    
+    // Initialize Feather icons
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+});
+</script>
